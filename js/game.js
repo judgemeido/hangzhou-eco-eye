@@ -635,8 +635,21 @@
       </div>`;
     card.querySelector(".pname").oninput = (e) => { p.name = e.target.value; };
     card.querySelector(".pbase").oninput = (e) => { p.baseUrl = e.target.value; };
-    card.querySelector(".pfmt").onchange = (e) => { p.format = e.target.value; };
-    card.querySelector(".ppath").oninput = (e) => { p.path = e.target.value; };
+    const pathInput = card.querySelector(".ppath");
+    const DEFAULT_PATHS = Object.values(AIEngine.FORMAT_DEFAULT_PATH || {});
+    card.querySelector(".pfmt").onchange = (e) => {
+      p.format = e.target.value;
+      // 切换 API 格式时，若端点为空或仍是某个格式的默认端点，就自动同步为新格式的默认端点
+      // （openai→/chat/completions、anthropic→/v1/messages、gemini→/models）；
+      // 用户手填过的自定义端点则保留不动。
+      const def = (AIEngine.FORMAT_DEFAULT_PATH || {})[p.format] || "";
+      const cur = (p.path || "").trim();
+      if (!cur || DEFAULT_PATHS.includes(cur)) {
+        p.path = def;
+        pathInput.value = def;
+      }
+    };
+    pathInput.oninput = (e) => { p.path = e.target.value; };
     card.querySelector(".pkey").oninput = (e) => { p.apiKey = e.target.value; };
     card.querySelector(".pctx").oninput = (e) => { p.contextTokens = parseInt(e.target.value, 10) || AIEngine.DEFAULT_CONTEXT; };
     card.querySelector(".api-prov-del").onclick = () => {

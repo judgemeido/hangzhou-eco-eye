@@ -9,6 +9,7 @@
  * 因此用 ALLOW_HOSTS 白名单限制只能转发到已知大模型接口域名；接其它供应商就加进来。
  */
 const ALLOW_HOSTS = new Set([
+  "myapi.creitingameplays.com",
   "api.ltzy.top",
   "api.openai.com",
   "api.anthropic.com",

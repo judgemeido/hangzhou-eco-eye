@@ -90,20 +90,22 @@ const PROVIDER_TEMPLATES = [
 ];
 const DEFAULT_CONTEXT = 200000;
 const FORMAT_LABELS = { openai: "OpenAI 兼容", anthropic: "Anthropic", gemini: "Gemini" };
+/* 各 API 格式对应的默认端点：切换格式时用来自动同步「API 地址（端点）」 */
+const FORMAT_DEFAULT_PATH = { openai: "/chat/completions", anthropic: "/v1/messages", gemini: "/models" };
 
 /* ---------- 配置：加载 / 保存 / 迁移 ---------- */
 const AI_CFG_KEY = "hz-eco-eye-ai";
-const AI_CFG_VERSION = 2;   // 版本升级时，旧配置会被内置默认覆盖一次
-/* 内置默认：预置一个开放接口供应商并设为当前模型（OpenAI 接口模式） */
+const AI_CFG_VERSION = 3;   // 版本升级时，旧配置会被内置默认覆盖一次
+/* 内置默认：预置一个开放接口供应商并设为当前模型（Anthropic 接口模式） */
 const BUILTIN_DEFAULT = {
   version: AI_CFG_VERSION,
-  activeKey: "ltzy::minimaxai/minimax-m3",
+  activeKey: "myapi::minimaxai/minimax-m3",
   providers: [{
-    id: "ltzy",
-    name: "LTZY",
-    format: "openai",
-    baseUrl: "https://api.ltzy.top/v1",
-    path: "/chat/completions",
+    id: "myapi",
+    name: "MyAPI",
+    format: "anthropic",
+    baseUrl: "https://myapi.creitingameplays.com",
+    path: "/v1/messages",
     apiKey: "",   // 出于安全考虑不内置密钥：请在设置（Ctrl+8）中填入你自己的 API Key
     contextTokens: DEFAULT_CONTEXT,
     models: ["minimaxai/minimax-m3"]
@@ -325,7 +327,7 @@ window.AI_ENGINE = isReal() ? "real" : "mock";   // 仅内部标记，不对用�
 
 window.AIEngine = {
   searchWebImage, imageUrlsFor, SCAN_STEPS, CHALLENGE_STEPS,
-  TEMPLATES: PROVIDER_TEMPLATES, DEFAULT_CONTEXT, FORMAT_LABELS,
+  TEMPLATES: PROVIDER_TEMPLATES, DEFAULT_CONTEXT, FORMAT_LABELS, FORMAT_DEFAULT_PATH,
   getConfig: () => window.AI_CONFIG,
   isReal, activeLabel,
   imageDataUrlFor, aiIdentify, testConnection,
