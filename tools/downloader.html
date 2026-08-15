@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>图片本地化下载器</title>
+  <style>
+    body { background:#07140f; color:#d7f5e6; font: 14px/1.6 system-ui, sans-serif; padding:20px; }
+    h1 { font-size:18px; }
+    #status { font-size:16px; color:#5ff2c0; margin:10px 0; }
+    ul { list-style:none; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:4px 14px; }
+    li { font-family:monospace; font-size:12px; }
+    .ok { color:#7fd8be; } .bad { color:#ff7a7a; }
+  </style>
+</head>
+<body>
+  <h1>图片本地化下载器</h1>
+  <div id="status">准备中…</div>
+  <ul id="list"></ul>
+
+  <script>
+  // 浏览器下载远程图 → 压缩到最长边 800px 的 JPEG → 回传本地服务写盘。
+  const MAX = 800, QUALITY = 0.82, CONCURRENCY = 4;
+  const statusEl = document.getElementById("status");
+  const listEl = document.getElementById("list");
+  const result = { ok: [], fail: [] };
+  window.__RESULT = result;
+  window.__DONE = false;
+
+  function log(id, okFlag, note) {
+    const li = document.createElement("li");
+    li.className = okFlag ? "ok" : "bad";
+    li.textContent = (okFlag ? "✓ " : "✗ ") + id + (note ? " · " + note : "");
+    listEl.appendChild(li);
+  }
+
+  async function toJpegDataUrl(blob) {
+    const bmp = await createImageBitmap(blob);
+    const scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+    const w = Math.round(bmp.width * scale), h = Math.round(bmp.height * scale);
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    cv.getContext("2d").drawImage(bmp, 0, 0, w, h);
+    bmp.close && bmp.close();
+    return cv.toDataURL("image/jpeg", QUALITY);
+  }
+
+  async function handleOne(id, url) {
+    try {
+      const resp = await fetch(url, { mode: "cors", cache: "no-store" });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      const dataUrl = await toJpegDataUrl(await resp.blob());
+      const put = await fetch("/save?name=" + encodeURIComponent(id), {
+        method: "POST", body: dataUrl
+      });
+      const txt = await put.text();
+      if (!put.ok) throw new Error(txt);
+      result.ok.push(id);
+      log(id, true, txt.replace("ok ", "") + "B");
+    } catch (e) {
+      result.fail.push({ id, err: String(e.message || e) });
+      log(id, false, String(e.message || e));
+    }
+    statusEl.textContent = `进行中… 成功 ${result.ok.length} · 失败 ${result.fail.length}`;
+  }
+
+  (async () => {
+    const map = await (await fetch("/list.json")).json();
+    const entries = Object.entries(map);
+    statusEl.textContent = `共 ${entries.length} 张，开始下载…`;
+    let cursor = 0;
+    await Promise.all(Array.from({ length: CONCURRENCY }, async () => {
+      while (cursor < entries.length) {
+        const [id, url] = entries[cursor++];
+        await handleOne(id, url);
+      }
+    }));
+    window.__DONE = true;
+    statusEl.textContent = `全部完成：成功 ${result.ok.length} · 失败 ${result.fail.length}`;
+  })();
+  </script>
+</body>
+</html>

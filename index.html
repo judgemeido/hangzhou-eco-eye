@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>火眼金睛 · 杭州生态 AI 识别</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- 动态背景粒子 -->
+  <canvas id="bg"></canvas>
+
+  <div class="app">
+    <!-- 顶栏 -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">🦉</span>
+        <div>
+          <h1>火眼金睛</h1>
+          <p class="tagline">杭州生态 · AI 视觉识别档案</p>
+        </div>
+      </div>
+      <div class="hud">
+        <div class="hud-item"><span id="scoreVal">0</span><label>生态积分</label></div>
+        <div class="hud-item"><span id="collectedVal">0</span><label>已收录</label></div>
+        <div class="hud-item"><span id="totalVal">0</span><label>物种总数</label></div>
+      </div>
+    </header>
+
+    <!-- ========== 舞台 1：首页 ========== -->
+    <section id="screen-home" class="screen active">
+      <div class="hero">
+        <h2>解锁 <em>AI 视觉识别「火眼金睛」</em></h2>
+        <p class="hero-sub">15 秒限时闯关、闪电标记，和队友建立最硬核的数字生态档案！</p>
+        <p class="hero-desc">一张杭州生态照片、4 个名称选项、15 秒倒计时。<br/>答对入档加分，答错扣分——AI 会当场核验你的火眼金睛。</p>
+        <div class="hero-actions">
+          <button id="startScanBtn" class="btn primary">🔍 开始识别闯关</button>
+          <button id="goArchiveBtn" class="btn ghost">📚 我的生态档案</button>
+          <button id="resetBtn" class="btn ghost danger">♻️ 重置存档</button>
+        </div>
+      </div>
+      <div class="progress-strip">
+        <div class="progress-bar"><div id="homeProgress" class="progress-fill"></div></div>
+        <span id="homeProgressText">收录进度 0 / 0</span>
+      </div>
+    </section>
+
+    <!-- ========== 舞台 2：选择/上传 ========== -->
+    <section id="screen-pick" class="screen">
+      <button class="back-btn" data-to="home">← 返回</button>
+      <h3 class="screen-title">选择一个野外样本开始闯关</h3>
+      <p class="screen-hint">点选下方任意样本，进入 <b>15 秒限时识别</b>：从 4 个名称中选出正确答案。答对加分，答错或超时扣分。</p>
+
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/*" hidden />
+        <div class="upload-inner">
+          <span class="upload-icon">⬆️</span>
+          <strong>上传图片（练习模式）</strong>
+          <small>点击或拖拽图片到此 · 上传照片无标准答案，仅走识别流程、不计分</small>
+        </div>
+      </div>
+
+      <div class="sample-grid" id="sampleGrid"><!-- JS 注入样本卡 --></div>
+    </section>
+
+    <!-- ========== 舞台 2.5：限时闯关答题 ========== -->
+    <section id="screen-quiz" class="screen">
+      <button class="back-btn" data-to="pick">← 放弃本关</button>
+      <div class="quiz">
+        <div class="quiz-photo">
+          <img id="quizImg" alt="待识别样本" />
+          <div class="quiz-emoji" id="quizEmoji">🖼️</div>
+          <span class="quiz-kind" id="quizKind"></span>
+        </div>
+        <div class="quiz-panel">
+          <div class="quiz-head">
+            <h3 class="screen-title">⏱️ 限时识别闯关</h3>
+            <div class="quiz-clock" id="quizClock">15.0<small>s</small></div>
+          </div>
+          <div class="progress-bar big"><div id="quizTimerFill" class="progress-fill"></div></div>
+          <p class="screen-hint">15 秒内选出它的正确名称，随后 AI 将核验你的判定。</p>
+          <div class="quiz-options" id="quizOptions"><!-- JS 注入 4 个选项 --></div>
+          <div class="quiz-stakes" id="quizStakes"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 舞台 3：识别动画 ========== -->
+    <section id="screen-scan" class="screen">
+      <div class="scanner">
+        <div class="scan-frame">
+          <img id="scanImg" alt="待识别样本" />
+          <div class="scan-emoji" id="scanEmoji">🖼️</div>
+          <div class="scan-line"></div>
+          <div class="scan-grid"></div>
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <div class="reticle" id="reticle"></div>
+        </div>
+        <div class="scan-panel">
+          <div class="scan-status" id="scanStatus">AI 正在分析…</div>
+          <div class="progress-bar big"><div id="scanProgress" class="progress-fill"></div></div>
+          <ul class="scan-log" id="scanLog"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 舞台 4：识别结果 ========== -->
+    <section id="screen-result" class="screen">
+      <div class="result-card" id="resultCard"><!-- JS 注入 --></div>
+    </section>
+
+    <!-- ========== 舞台 5：数字生态档案 ========== -->
+    <section id="screen-archive" class="screen">
+      <button class="back-btn" data-to="home">← 返回</button>
+      <h3 class="screen-title">📚 数字生态档案</h3>
+      <div class="archive-filter">
+        <button class="chip active" data-filter="all">全部</button>
+        <button class="chip" data-filter="animal">🐾 动物</button>
+        <button class="chip" data-filter="plant">🌿 植物</button>
+      </div>
+      <div class="archive-grid" id="archiveGrid"><!-- JS 注入 --></div>
+    </section>
+  </div>
+
+  <!-- 闪电标记弹层 -->
+  <div id="tagModal" class="modal">
+    <div class="modal-box">
+      <h3>⚡ 闪电标记</h3>
+      <p>限时 3 秒！这是动物还是植物？答对额外 +50 分。</p>
+      <div class="tag-target" id="tagTarget"></div>
+      <div class="tag-btns">
+        <button class="btn tag-animal" data-kind="animal">🐾 动物</button>
+        <button class="btn tag-plant" data-kind="plant">🌿 植物</button>
+      </div>
+      <div class="tag-timer"><div id="tagTimerFill"></div></div>
+    </div>
+  </div>
+
+  <!-- 提示气泡 -->
+  <div id="toast" class="toast"></div>
+
+  <!-- 重置存档确认 -->
+  <div id="resetModal" class="modal">
+    <div class="modal-box">
+      <h3>♻️ 重置存档</h3>
+      <p>将清空所有已收录物种，生态积分恢复为初始的 <b style="color:var(--gold)">100</b> 分。此操作不可撤销，确定继续吗？</p>
+      <div class="api-actions">
+        <button class="btn ghost" id="resetCancelBtn">取消</button>
+        <button class="btn ghost danger" id="resetConfirmBtn">确定重置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI 识别引擎设置（开放接口 · Ctrl+8 调出） -->
+  <div id="apiModal" class="modal">
+    <div class="modal-box api-box">
+      <h3>🛰️ AI 识别引擎设置</h3>
+      <p>默认使用内置引擎（无需联网）。也可接入你自己的多模态大模型：填写供应商地址、API 格式、API 地址、Key、模型与上下文，选中后用于识别校验。</p>
+
+      <div class="api-engine-list" id="apiEngineList"><!-- JS 注入：默认引擎 + 供应商卡片 --></div>
+
+      <div class="api-add-row">
+        <select id="apiTemplate"><!-- JS 注入模板 --></select>
+        <button class="btn ghost" id="apiAddProvider">＋ 添加供应商</button>
+      </div>
+
+      <div class="api-actions">
+        <button class="btn ghost" id="apiCancelBtn">取消</button>
+        <button class="btn primary" id="apiSaveBtn">保存并应用</button>
+      </div>
+      <div class="api-hint">快捷键 <kbd>Ctrl</kbd>+<kbd>8</kbd> 调出；也可用地址栏 <kbd>#settings</kbd></div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/images.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
