@@ -1,0 +1,13 @@
+# Cloudflare Workers 部署配置（Workers + Static Assets 模式）
+# 部署命令：npx wrangler deploy
+# name 必须与 Cloudflare 面板里绑定 aix1.235737.xyz 的 Worker 服务名一致，
+# 否则会部署到另一个 Worker，自定义域不会更新。
+name = "hangzhou-eco-eye"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# 整个仓库根目录作为静态资源托管（index.html/js/css/assets 等）；
+# 未命中静态资源的请求（如 /ai-proxy）才会进入 worker.js 的 fetch 处理。
+[assets]
+directory = "./"
+binding = "ASSETS"
