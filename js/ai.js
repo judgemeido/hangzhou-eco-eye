@@ -344,12 +344,13 @@ window.AIEngine = {
   },
   // 仅走内置引擎（闯关的物种揭示始终用真实样本，不受大模型影响）
   recognizeLocal(opts) { return MockAI.recognize(opts); },
-  // 上传/通用识别：真实引擎失败时静默回退内置引擎
+  // 上传/通用识别：仅在配置了真实接口且识别成功时返回结果；
+  // 未配置或失败一律返回 null（静默），由上层退出识别页，绝不回退内置引擎伪造结果
   async recognize(opts) {
-    if (isReal()) {
-      try { return await RealAI.recognize(opts); }
-      catch (e) { return MockAI.recognize(opts); }
-    }
-    return MockAI.recognize(opts);
+    if (!isReal()) return null;
+    try {
+      const res = await RealAI.recognize(opts);
+      return (res && res.species) ? res : null;
+    } catch (e) { return null; }
   }
 };
