@@ -95,11 +95,11 @@ const FORMAT_DEFAULT_PATH = { openai: "/chat/completions", anthropic: "/v1/messa
 
 /* ---------- 配置：加载 / 保存 / 迁移 ---------- */
 const AI_CFG_KEY = "hz-eco-eye-ai";
-const AI_CFG_VERSION = 3;   // 版本升级时，旧配置会被内置默认覆盖一次
+const AI_CFG_VERSION = 4;   // 版本升级时，旧配置会被内置默认覆盖一次
 /* 内置默认：预置一个开放接口供应商并设为当前模型（Anthropic 接口模式） */
 const BUILTIN_DEFAULT = {
   version: AI_CFG_VERSION,
-  activeKey: "myapi::minimaxai/minimax-m3",
+  activeKey: "myapi::gemini-3.5-flash",
   providers: [{
     id: "myapi",
     name: "MyAPI",
@@ -108,7 +108,7 @@ const BUILTIN_DEFAULT = {
     path: "/v1/messages",
     apiKey: "",   // 出于安全考虑不内置密钥：请在设置（Ctrl+8）中填入你自己的 API Key
     contextTokens: DEFAULT_CONTEXT,
-    models: ["minimaxai/minimax-m3"]
+    models: ["gemini-3.5-flash"]
   }]
 };
 function loadAIConfig() {

@@ -5,9 +5,11 @@
  *   （等价于本地 tools/serve.mjs 的 /ai-proxy）。
  * - 其余请求：交给静态资源绑定 env.ASSETS（即托管的游戏页面/js/图片等）。
  *
- * 安全：公开站点上的转发端点若允许任意 url 会变成开放代理（可被滥用 / SSRF），
- * 因此用 ALLOW_HOSTS 白名单限制只能转发到已知大模型接口域名；接其它供应商就加进来。
+ * ⚠️ 安全提醒：按用户要求已放开域名白名单——任意 https 目标都可经此端点转发，
+ *   这实际上是一个「开放代理」，可能被他人滥用（当作免费代理 / SSRF 探测内网等），
+ *   会消耗你的 Cloudflare 额度。若要收紧，把下方 ALLOW_HOSTS 检查重新启用即可。
  */
+// 已知大模型接口域名（当前不作强制校验，仅作参考/便于日后重新收紧白名单）：
 const ALLOW_HOSTS = new Set([
   "myapi.creitingameplays.com",
   "api.ltzy.top",
@@ -43,9 +45,9 @@ async function handleProxy(request) {
   const target = new URL(request.url).searchParams.get("url");
   if (!target || !/^https:\/\//i.test(target)) return json(400, { error: "bad target url" });
 
-  let t;
-  try { t = new URL(target); } catch (e) { return json(400, { error: "bad target url" }); }
-  if (!ALLOW_HOSTS.has(t.hostname)) return json(403, { error: "host not allowed" });
+  try { new URL(target); } catch (e) { return json(400, { error: "bad target url" }); }
+  // 白名单已按用户要求放开：任意 https 目标都放行（如需收紧，恢复下面这行）：
+  // if (!ALLOW_HOSTS.has(new URL(target).hostname)) return json(403, { error: "host not allowed" });
 
   const fwd = new Headers();
   for (const [k, v] of request.headers) {
