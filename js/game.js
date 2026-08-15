@@ -306,6 +306,8 @@
     }
 
     recognizePromise.then(async (res) => {
+      // 上传练习：接口无结果（连不上/超时/返回异常）即静默退出识别页，不显示任何内容
+      if (!input.challenge && !res) { show("home"); return; }
       const items = log.querySelectorAll("li");
       if (items.length) items[items.length - 1].classList.add("done");
       const ch = input.challenge;
@@ -544,6 +546,8 @@
   /* -------- 上传图片处理 -------- */
   function handleFile(file) {
     if (!file || !file.type.startsWith("image/")) { toast("请选择图片文件"); return; }
+    // 未配置识别接口：静默不进入识别页（失败即静默 · 不显示任何内容）
+    if (!AIEngine.isReal()) { return; }
     const reader = new FileReader();
     reader.onload = (e) => startScan({ imageDataUrl: e.target.result });
     reader.readAsDataURL(file);
