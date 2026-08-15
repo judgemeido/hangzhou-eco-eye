@@ -95,20 +95,20 @@ const FORMAT_DEFAULT_PATH = { openai: "/chat/completions", anthropic: "/v1/messa
 
 /* ---------- 配置：加载 / 保存 / 迁移 ---------- */
 const AI_CFG_KEY = "hz-eco-eye-ai";
-const AI_CFG_VERSION = 5;   // 版本升级时，旧配置会被内置默认覆盖一次
-/* 内置默认：预置一个开放接口供应商并设为当前模型（Anthropic 接口模式） */
+const AI_CFG_VERSION = 6;   // 版本升级时，旧配置会被内置默认覆盖一次
+/* 内置默认：预置一个开放接口供应商并设为当前模型（OpenAI 接口模式） */
 const BUILTIN_DEFAULT = {
   version: AI_CFG_VERSION,
-  activeKey: "myapi::kimi-k2.5",
+  activeKey: "hcnsec::MiniMax-M3",
   providers: [{
-    id: "myapi",
-    name: "MyAPI",
-    format: "anthropic",
-    baseUrl: "https://myapi.creitingameplays.com",
-    path: "/v1/messages",
+    id: "hcnsec",
+    name: "HCNSec",
+    format: "openai",
+    baseUrl: "https://api.hcnsec.cn/v1",
+    path: "/chat/completions",
     apiKey: "",   // 出于安全考虑不内置密钥：请在设置（Ctrl+8）中填入你自己的 API Key
     contextTokens: DEFAULT_CONTEXT,
-    models: ["kimi-k2.5"]
+    models: ["MiniMax-M3"]
   }]
 };
 function loadAIConfig() {
