@@ -3,7 +3,10 @@
  * 依赖 css/style.css 的主题变量（--panel / --panel-line / --text 等）
  * ================================================================== */
 
-#screen-map { display: flex; flex-direction: column; }
+#screen-map { flex-direction: column; }
+/* display 必须挂在 .active 上：#id 选择器优先级高于 .screen{display:none}，
+   否则地图屏会一直显示在首页下方（未激活也不隐藏）。 */
+#screen-map.active { display: flex; }
 
 .map-topbar {
   display: flex; align-items: center; gap: 12px;
