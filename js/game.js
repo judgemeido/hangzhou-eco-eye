@@ -473,7 +473,7 @@
     if (tagBtn) tagBtn.onclick = () => openTagGame(sp);
     card.querySelector("#againBtn").onclick = () => {
       renderSamples();
-      if (window.HZMap) { HZMap.render(); show("map"); }
+      if (window.HZMap) { show("map"); HZMap.render(); }
       else show("pick");
     };
     card.querySelector("#archiveBtn2").onclick = () => { renderArchive(); show("archive"); };
@@ -719,7 +719,7 @@
   /* -------- 事件绑定 & 初始化 -------- */
   function bindEvents() {
     $("#startScanBtn").onclick = () => {
-      if (window.HZMap) { HZMap.render(); show("map"); }
+      if (window.HZMap) { show("map"); HZMap.render(); }
       else { renderSamples(); show("pick"); }
     };
     $("#goArchiveBtn").onclick = () => { renderArchive(); show("archive"); };
@@ -740,8 +740,8 @@
     $$(".back-btn").forEach((b) => (b.onclick = () => {
       abandonQuiz();
       if (b.dataset.to === "pick") renderSamples();
-      if (b.dataset.to === "map" && window.HZMap) HZMap.render();
       show(b.dataset.to);
+      if (b.dataset.to === "map" && window.HZMap) HZMap.render();
     }));
 
     // 上传区
