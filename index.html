@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>火眼金睛 · 杭州生态 AI 识别</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/map.css" />
 </head>
 <body>
   <!-- 动态背景粒子 -->
@@ -63,9 +64,32 @@
       <div class="sample-grid" id="sampleGrid"><!-- JS 注入样本卡 --></div>
     </section>
 
+    <!-- ========== 舞台 2·地图：杭州生态地图（v2.0 选择入口） ========== -->
+    <section id="screen-map" class="screen">
+      <button class="back-btn" data-to="home">← 返回</button>
+      <div class="map-topbar">
+        <h3 class="screen-title">🗺️ 杭州生态地图</h3>
+        <span class="map-spacer"></span>
+        <label class="map-upload" id="mapUploadZone">
+          <input type="file" id="mapFileInput" accept="image/*" hidden />
+          ⬆️ 上传图片（练习）
+        </label>
+        <span id="mapProgressText">已收录 0 / 0</span>
+      </div>
+      <p class="map-hint">滚轮缩放 · 左键按住拖拽或方向键 ↑↓←→ 平移 · 点击地图上的物种进入 <b>15 秒限时识别</b></p>
+      <div class="map-stage">
+        <div id="mapCanvas"><!-- JS 注入 SVG 地图 --></div>
+        <div class="map-controls" style="position:absolute; right:14px; bottom:14px;">
+          <button class="map-ctrl-btn" id="mapZoomOut" title="缩小" aria-label="缩小">−</button>
+          <button class="map-ctrl-btn" id="mapZoomIn" title="放大" aria-label="放大">＋</button>
+          <button class="map-ctrl-btn wide" id="mapReset" title="重置视图">重置视图</button>
+        </div>
+      </div>
+    </section>
+
     <!-- ========== 舞台 2.5：限时闯关答题 ========== -->
     <section id="screen-quiz" class="screen">
-      <button class="back-btn" data-to="pick">← 放弃本关</button>
+      <button class="back-btn" data-to="map">← 放弃本关</button>
       <div class="quiz">
         <div class="quiz-photo">
           <img id="quizImg" alt="待识别样本" />
@@ -176,6 +200,7 @@
   <script src="js/data.js"></script>
   <script src="js/images.js"></script>
   <script src="js/ai.js"></script>
+  <script src="js/map.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>

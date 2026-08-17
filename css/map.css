@@ -1,0 +1,84 @@
+/* ==================================================================
+ * 杭州生态地图（v2.0）样式
+ * 依赖 css/style.css 的主题变量（--panel / --panel-line / --text 等）
+ * ================================================================== */
+
+#screen-map { display: flex; flex-direction: column; }
+
+.map-topbar {
+  display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap; margin-bottom: 12px;
+}
+.map-topbar .screen-title { margin: 0; }
+.map-topbar .map-spacer { flex: 1; }
+.map-hint { color: var(--text-dim); font-size: 13px; margin: 2px 0 12px; }
+
+/* 地图画布 */
+.map-stage { position: relative; flex: 1; min-height: 60vh; }
+#mapCanvas {
+  position: relative;
+  width: 100%; height: 68vh; min-height: 420px;
+  border: 1px solid var(--panel-line); border-radius: 18px;
+  overflow: hidden; background: #0a2620;
+  cursor: grab; touch-action: none;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, .4);
+}
+#mapCanvas.grabbing { cursor: grabbing; }
+.mp-svg { display: block; width: 100%; height: 100%; user-select: none; }
+
+/* 分区标注 */
+.mp-zone-label {
+  fill: #dff7ec; font-size: 20px; font-weight: 700;
+  paint-order: stroke; stroke: rgba(0, 0, 0, .45); stroke-width: 4px;
+  pointer-events: none; opacity: .9;
+}
+
+/* 物种标记 */
+.mp-marker { cursor: pointer; outline: none; }
+.mp-ring {
+  stroke: #ffffff; stroke-width: 2.5;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .5));
+  transition: stroke .15s ease;
+}
+.mp-marker.is-animal .mp-ring { stroke: #ffd98a; }
+.mp-marker.is-plant  .mp-ring { stroke: #9fe6a0; }
+.mp-marker.owned .mp-ring { stroke: #35d6a0; stroke-width: 3.5; }
+.mp-marker:hover .mp-ring,
+.mp-marker:focus-visible .mp-ring { stroke: #ffffff; stroke-width: 4; }
+.mp-marker:hover { }
+
+.mp-emoji { font-size: 18px; pointer-events: none; }
+.mp-img { pointer-events: none; }
+.mp-check {
+  fill: #ffffff; font-size: 15px; font-weight: 800; display: none;
+  paint-order: stroke; stroke: #1a9a72; stroke-width: 3px;
+  pointer-events: none;
+}
+.mp-marker.owned .mp-check { display: block; }
+
+/* 控制条 */
+.map-controls { display: flex; align-items: center; gap: 8px; }
+.map-ctrl-btn {
+  width: 40px; height: 40px; font-size: 20px; line-height: 1;
+  border-radius: 12px; cursor: pointer;
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--panel-line);
+}
+.map-ctrl-btn:hover { background: rgba(90, 240, 200, .16); }
+.map-ctrl-btn.wide { width: auto; padding: 0 14px; font-size: 14px; }
+#mapProgressText { color: var(--text-dim); font-size: 13px; }
+
+/* 地图屏上的练习上传入口（紧凑） */
+.map-upload {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 12px; cursor: pointer;
+  background: rgba(6, 30, 24, .8); border: 1px dashed var(--panel-line);
+  color: var(--text-dim); font-size: 13px;
+}
+.map-upload:hover { border-color: var(--mint); color: var(--text); }
+.map-upload.drag { border-color: var(--mint); color: var(--text); }
+
+@media (max-width: 640px) {
+  #mapCanvas { height: 60vh; }
+  .mp-zone-label { font-size: 24px; }
+}

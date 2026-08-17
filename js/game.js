@@ -471,7 +471,11 @@
     // 绑定结果页按钮（闪电标记仅在答对时出现）
     const tagBtn = card.querySelector("#tagBtn");
     if (tagBtn) tagBtn.onclick = () => openTagGame(sp);
-    card.querySelector("#againBtn").onclick = () => { renderSamples(); show("pick"); };
+    card.querySelector("#againBtn").onclick = () => {
+      renderSamples();
+      if (window.HZMap) { HZMap.render(); show("map"); }
+      else show("pick");
+    };
     card.querySelector("#archiveBtn2").onclick = () => { renderArchive(); show("archive"); };
   }
 
@@ -714,7 +718,10 @@
 
   /* -------- 事件绑定 & 初始化 -------- */
   function bindEvents() {
-    $("#startScanBtn").onclick = () => { renderSamples(); show("pick"); };
+    $("#startScanBtn").onclick = () => {
+      if (window.HZMap) { HZMap.render(); show("map"); }
+      else { renderSamples(); show("pick"); }
+    };
     $("#goArchiveBtn").onclick = () => { renderArchive(); show("archive"); };
     // 重置存档：清空收录并把积分恢复为初始 100（弹窗二次确认，避免误清）
     $("#resetBtn").onclick = () => $("#resetModal").classList.add("show");
@@ -725,6 +732,7 @@
     $("#resetConfirmBtn").onclick = () => {
       resetState();
       renderSamples();   // 若样本网格已渲染，同步复位为「未识别」
+      if (window.HZMap) HZMap.refresh();  // 地图标记的 ✓ 同步清除
       $("#resetModal").classList.remove("show");
       toast("♻️ 存档已重置，生态积分恢复为 " + INIT_SCORE);
     };
@@ -732,6 +740,7 @@
     $$(".back-btn").forEach((b) => (b.onclick = () => {
       abandonQuiz();
       if (b.dataset.to === "pick") renderSamples();
+      if (b.dataset.to === "map" && window.HZMap) HZMap.render();
       show(b.dataset.to);
     }));
 
@@ -745,6 +754,10 @@
       e.preventDefault(); zone.classList.remove("drag");
       handleFile(e.dataTransfer.files[0]);
     });
+
+    // 地图屏上传练习入口（与首页上传共用 handleFile：无 Key 静默、有 Key 走真实识别）
+    const mapInput = $("#mapFileInput");
+    if (mapInput) mapInput.onchange = (e) => handleFile(e.target.files[0]);
 
     // 档案筛选
     $$(".chip").forEach((chip) => {
@@ -791,5 +804,10 @@
     bindEvents();
     refreshHUD();
   }
+  // 供 map.js 调用：点标记进入答题、查询已收录 id、结算后刷新地图 ✓
+  window.HZGame = {
+    startChallenge: (sp) => startChallenge(sp),
+    collectedIds: () => state.collected.slice(),
+  };
   document.addEventListener("DOMContentLoaded", init);
 })();
