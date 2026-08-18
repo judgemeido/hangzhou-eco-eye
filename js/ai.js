@@ -81,6 +81,7 @@ const MockAI = {
 /* ================= 2) 大模型引擎（开放接口） ================= */
 /* 快速模板：新增供应商时可一键预填 供应商地址 / API 格式 / API 地址 / 模型 */
 const PROVIDER_TEMPLATES = [
+  { name: "88888",    format: "anthropic", baseUrl: "https://88888.qzz.io", path: "/v1/messages", models: ["minimax-m3"] },
   { name: "自定义",   format: "openai",    baseUrl: "", path: "/chat/completions", models: [] },
   { name: "智谱 GLM", format: "openai",    baseUrl: "https://open.bigmodel.cn/api/paas/v4", path: "/chat/completions", models: ["glm-4v", "glm-4.5v"] },
   { name: "OpenAI",   format: "openai",    baseUrl: "https://api.openai.com/v1", path: "/chat/completions", models: ["gpt-4o", "gpt-4o-mini"] },
@@ -95,18 +96,27 @@ const FORMAT_DEFAULT_PATH = { openai: "/chat/completions", anthropic: "/v1/messa
 
 /* ---------- 配置：加载 / 保存 / 迁移 ---------- */
 const AI_CFG_KEY = "hz-eco-eye-ai";
-const AI_CFG_VERSION = 6;   // 版本升级时，旧配置会被内置默认覆盖一次
-/* 内置默认：预置一个开放接口供应商并设为当前模型（OpenAI 接口模式） */
+const AI_CFG_VERSION = 7;   // 版本升级时，旧配置会被内置默认覆盖一次
+/* 内置默认：预置一个开放接口供应商并设为当前模型（88888 / Anthropic 接口模式） */
 const BUILTIN_DEFAULT = {
   version: AI_CFG_VERSION,
-  activeKey: "hcnsec::MiniMax-M3",
+  activeKey: "88888::minimax-m3",
   providers: [{
+    id: "88888",
+    name: "88888",
+    format: "anthropic",
+    baseUrl: "https://88888.qzz.io",
+    path: "/v1/messages",
+    apiKey: "",   // 出于安全考虑不内置密钥：请在设置（Ctrl+8）中填入你自己的 API Key
+    contextTokens: DEFAULT_CONTEXT,
+    models: ["minimax-m3"]
+  }, {
     id: "hcnsec",
     name: "HCNSec",
     format: "openai",
     baseUrl: "https://api.hcnsec.cn/v1",
     path: "/chat/completions",
-    apiKey: "",   // 出于安全考虑不内置密钥：请在设置（Ctrl+8）中填入你自己的 API Key
+    apiKey: "",
     contextTokens: DEFAULT_CONTEXT,
     models: ["MiniMax-M3"]
   }]
