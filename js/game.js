@@ -292,8 +292,8 @@
       const real = AIEngine.imageDataUrlFor(sp)
         .then((durl) => (durl ? AIEngine.aiIdentify({ imageDataUrl: durl, brief: true }) : null))
         .catch(() => null);
-      // 上限等待，避免个别接口卡住时结算界面一直不出现
-      const timeout = new Promise((r) => setTimeout(() => r(null), 20000));
+      // 上限等待≈25s：AI 识别较慢，给大模型充足的辨别时间，又避免个别接口卡死时结算界面一直不出现
+      const timeout = new Promise((r) => setTimeout(() => r(null), 25000));
       aiCheckPromise = Promise.race([real, timeout]);
     }
 

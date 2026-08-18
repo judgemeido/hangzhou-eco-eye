@@ -22,39 +22,65 @@
   position: relative;
   width: 100%; height: 68vh; min-height: 420px;
   border: 1px solid var(--panel-line); border-radius: 18px;
-  overflow: hidden; background: #dfe6e1;
-  box-shadow: inset 0 0 60px rgba(0, 0, 0, .25);
+  overflow: hidden; background: #e7efe8;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, .18);
 }
-.leaflet-container { background: #dfe6e1; font: inherit; border-radius: 18px; }
+.leaflet-container { background: #e7efe8; font: inherit; border-radius: 18px; }
 .leaflet-container a { color: var(--mint); }
+/* 卡通观感：给矢量瓦片提饱和 + 轻微对比，更明快像插画 */
+.leaflet-tile { filter: saturate(1.28) contrast(1.02) brightness(1.02); }
 
-/* 物种标记：圆形缩略图 */
+/* ---------- 物种标记：圆框 UI（缩略图用圆形遮罩裁成圆形，浮在卡通地图上） ---------- */
 .mp-divicon { background: none; border: none; }
 .mp-pin { position: relative; width: 42px; height: 42px; cursor: pointer;
   transition: transform .12s ease; }
+/* 普通圆框：白色内圈 + 按大类着色的外圈 + 阴影（外圈用 box-shadow，不受遮罩裁切）
+   position:relative 关键——让内部绝对定位的缩略图相对「边框内的内容盒」定位，
+   否则会相对整颗 .mp-pin(42px) 定位、比白环内圈(38px)大一圈，导致圆形遮罩不吻合。 */
 .mp-pin-face {
+  position: relative;
   width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
-  box-sizing: border-box; border: 3px solid #ffd98a; background: #0a2620;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
+  box-sizing: border-box; border: 2px solid #fff; background: #0a2620;
+  box-shadow: 0 0 0 2px #ffd98a, 0 2px 7px rgba(0, 0, 0, .55);
   display: flex; align-items: center; justify-content: center;
 }
-.mp-pin.is-animal .mp-pin-face { border-color: #ffd98a; }
-.mp-pin.is-plant  .mp-pin-face { border-color: #9fe6a0; }
+.mp-pin.is-animal .mp-pin-face { box-shadow: 0 0 0 2px #ffd98a, 0 2px 7px rgba(0, 0, 0, .65); }
+.mp-pin.is-plant  .mp-pin-face { box-shadow: 0 0 0 2px #9fe6a0, 0 2px 7px rgba(0, 0, 0, .65); }
+/* 特殊圆框：已识别 —— 金色发光双环，一眼区分 */
 .mp-pin.owned .mp-pin-face {
-  border-color: #35d6a0;
-  box-shadow: 0 0 0 2px rgba(53, 214, 160, .5), 0 2px 8px rgba(0, 0, 0, .5);
+  border-color: #fff8e6;
+  box-shadow: 0 0 0 3px #ffcf40, 0 0 12px 2px rgba(255, 207, 64, .75),
+              0 2px 8px rgba(0, 0, 0, .55);
 }
-.mp-pin:hover { transform: scale(1.14); z-index: 1000; }
+.mp-pin.owned { animation: mpOwnedGlow 2.6s ease-in-out infinite; }
+@keyframes mpOwnedGlow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(255, 207, 64, 0)); }
+  50%      { filter: drop-shadow(0 0 5px rgba(255, 207, 64, .85)); }
+}
+.mp-pin:hover { transform: scale(1.16); z-index: 1000; }
 .mp-pin-emoji { position: absolute; inset: 0; display: flex;
   align-items: center; justify-content: center; font-size: 20px; }
-.mp-pin-img { position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; }
+/* 缩略图：填满白环内的内容盒（38px 正方）+ 圆形遮罩裁正圆。
+   关键：用 top/left:50% + translate(-50%,-50%) 从中心锚定 ——
+   即使某张原图非正方(如 600×800)导致宽度被内在比例收缩，也永远居中，
+   不会像 inset:0 那样把 right 让位而向左偏、圆圈对不上白环。
+   同时叠加 border-radius:50% 双保险裁圆（与 face 的 overflow 抗锯齿一致）。 */
+.mp-pin-img {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(circle closest-side, #000 100%, transparent 100%);
+          mask: radial-gradient(circle closest-side, #000 100%, transparent 100%);
+}
 .mp-pin-check {
-  position: absolute; top: -4px; right: -4px;
-  width: 18px; height: 18px; border-radius: 50%;
-  background: #1a9a72; color: #fff; font-size: 12px; font-weight: 800;
+  position: absolute; top: -5px; right: -5px;
+  width: 19px; height: 19px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffe08a, #f2a65a); color: #3a2600;
+  font-size: 12px; font-weight: 900;
   display: none; align-items: center; justify-content: center;
-  border: 2px solid #fff;
+  border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .5);
 }
 .mp-pin.owned .mp-pin-check { display: flex; }
 

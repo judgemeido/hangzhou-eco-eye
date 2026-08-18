@@ -78,7 +78,11 @@ http.createServer((req, res) => {
   if (!filePath.startsWith(ROOT)) { res.writeHead(403); return res.end("forbidden"); }
   fs.readFile(filePath, (err, buf) => {
     if (err) { res.writeHead(404); return res.end("not found"); }
-    res.writeHead(200, { "Content-Type": MIME[path.extname(filePath).toLowerCase()] || "application/octet-stream" });
+    res.writeHead(200, {
+      "Content-Type": MIME[path.extname(filePath).toLowerCase()] || "application/octet-stream",
+      // 本地开发：禁用缓存，确保改完 CSS/JS 刷新即生效（避免看到旧样式）
+      "Cache-Control": "no-store, must-revalidate"
+    });
     res.end(buf);
   });
 }).listen(PORT, () => console.log("火眼金睛 running at http://localhost:" + PORT + "/"));

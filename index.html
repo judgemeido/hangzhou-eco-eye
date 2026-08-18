@@ -6,7 +6,7 @@
   <title>火眼金睛 · 杭州生态 AI 识别</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css" />
-  <link rel="stylesheet" href="css/map.css" />
+  <link rel="stylesheet" href="css/map.css?v=20260818d" />
 </head>
 <body>
   <!-- 动态背景粒子 -->
@@ -77,9 +77,9 @@
         </label>
         <span id="mapProgressText">已收录 0 / 0</span>
       </div>
-      <p class="map-hint">滚轮缩放 · 左键按住拖拽或方向键 ↑↓←→ 平移 · 点击地图上的物种进入 <b>15 秒限时识别</b></p>
+      <p class="map-hint">卡通地图 · 滚轮缩放 · 左键按住拖拽或方向键 ↑↓←→ 平移 · 点击物种进入 <b>15 秒限时识别</b>（<span style="color:var(--gold)">金色圆框</span>=已识别）</p>
       <div class="map-stage">
-        <div id="mapCanvas"><!-- JS 注入 SVG 地图 --></div>
+        <div id="mapCanvas"><!-- JS 注入 Leaflet 卡通矢量地图 --></div>
         <div class="map-controls" style="position:absolute; right:14px; bottom:14px;">
           <button class="map-ctrl-btn" id="mapZoomOut" title="缩小" aria-label="缩小">−</button>
           <button class="map-ctrl-btn" id="mapZoomIn" title="放大" aria-label="放大">＋</button>
@@ -177,6 +177,18 @@
     </div>
   </div>
 
+  <!-- 地图：已识别物种再次点击的确认 -->
+  <div id="mapAgainModal" class="modal">
+    <div class="modal-box">
+      <h3>✅ 已识别过</h3>
+      <p id="mapAgainText">你已经识别过该物种，是否继续识别？</p>
+      <div class="api-actions">
+        <button class="btn ghost" id="mapAgainCancelBtn">取消</button>
+        <button class="btn primary" id="mapAgainConfirmBtn">继续识别</button>
+      </div>
+    </div>
+  </div>
+
   <!-- AI 识别引擎设置（开放接口 · Ctrl+8 调出） -->
   <div id="apiModal" class="modal">
     <div class="modal-box api-box">
@@ -202,7 +214,7 @@
   <script src="js/images.js"></script>
   <script src="js/ai.js"></script>
   <script src="assets/vendor/leaflet/leaflet.js"></script>
-  <script src="js/map.js"></script>
-  <script src="js/game.js"></script>
+  <script src="js/map.js?v=20260818d"></script>
+  <script src="js/game.js?v=20260818e"></script>
 </body>
 </html>

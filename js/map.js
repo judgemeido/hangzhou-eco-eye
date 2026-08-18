@@ -1,13 +1,17 @@
 /**
- * 杭州生态地图（v2.0 · 真实地图）
+ * 杭州生态地图（v2.0 · 卡通矢量地图）
  * ==================================================================
- * 基于 Leaflet + 高德(AutoNavi)栅格瓦片，把 60 个物种（30 动物 + 30 植物）
+ * 基于 Leaflet + 高德(AutoNavi)矢量卡通瓦片，把 60 个物种（30 动物 + 30 植物）
  * 按栖息地落在真实的杭州经纬度上：滚轮缩放、左键拖拽、方向键 ↑↓←→ 平移，
- * 另有 ➕ ➖ 与「重置视图」。点击某个物种标记 → 进入原有的 15 秒限时识别
- * 答题流程（复用 window.HZGame.startChallenge，答题/计分/AI 校验逻辑不变）。
+ * 另有 ➕ ➖ 与「重置视图」。物种缩略图用圆形遮罩裁成圆形 UI 呈现；已识别过
+ * 的用金色发光特殊圆框标记，点击已识别的会弹出「是否继续识别」确认框；未识
+ * 别的直接进入原有的 15 秒限时识别答题流程（复用 window.HZGame.startChallenge，
+ * 答题/计分/AI 校验逻辑不变）。
  *
  * 坐标说明：高德瓦片为 GCJ-02 坐标系，故下方物种坐标直接以 GCJ-02 给出，
  * 与瓦片天然对齐、无需纠偏；Leaflet 由本地 assets/vendor/leaflet 载入。
+ * 底图 = 矢量卡通地图 style=7（wprd 主机，含道路/水系/地名），再由 CSS 提升
+ * 饱和度得到更卡通的观感（见 css/map.css 的 .leaflet-tile 滤镜）。
  * ------------------------------------------------------------------
  */
 (function () {
@@ -134,6 +138,7 @@
       zoomControl: false, maxBounds: HZ_MAX_BOUNDS, maxBoundsViscosity: 0.6,
       scrollWheelZoom: true, dragging: true, keyboard: true
     });
+    // 卡通矢量底图（style=7，含道路/水系/绿地/地名，CSS 再提饱和更卡通）
     L.tileLayer(
       "https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scl=1&style=7&x={x}&y={y}&z={z}",
       { subdomains: ["1", "2", "3", "4"], minZoom: MIN_ZOOM, maxZoom: MAX_ZOOM,
@@ -146,9 +151,7 @@
           iconSize: [42, 42], iconAnchor: [21, 21] }),
         keyboard: false, riseOnHover: true
       });
-      m.on("click", () => {
-        if (window.HZGame && HZGame.startChallenge) HZGame.startChallenge(sp);
-      });
+      m.on("click", () => onMarkerClick(sp));
       m.addTo(map);
       markers[sp.id] = { marker: m, sp };
     });
@@ -164,6 +167,33 @@
     refreshCollected();
   }
   function resetView() { if (map) map.setView(HZ_CENTER, DEFAULT_ZOOM); }
+
+  /* ---------- 点击标记：未识别→直接答题；已识别→先确认「是否继续识别」 ---------- */
+  function startQuiz(sp) {
+    if (window.HZGame && HZGame.startChallenge) HZGame.startChallenge(sp);
+  }
+  function onMarkerClick(sp) {
+    const isOwned = collected().indexOf(sp.id) >= 0;
+    if (isOwned) showAgainModal(sp);
+    else startQuiz(sp);
+  }
+  function showAgainModal(sp) {
+    const modal = document.getElementById("mapAgainModal");
+    if (!modal) { startQuiz(sp); return; }        // 兜底：无弹层则直接答题
+    const text = document.getElementById("mapAgainText");
+    if (text) {
+      text.innerHTML =
+        `<b style="color:var(--mint)">${sp.name}</b>（${sp.latin}）你已经识别并收录过了。` +
+        `是否再挑战一次？再次识别不会重复收录，但答对/答错仍会影响生态积分。`;
+    }
+    const cancel = document.getElementById("mapAgainCancelBtn");
+    const confirm = document.getElementById("mapAgainConfirmBtn");
+    const close = () => modal.classList.remove("show");
+    if (cancel) cancel.onclick = close;
+    if (confirm) confirm.onclick = () => { close(); startQuiz(sp); };
+    modal.onclick = (e) => { if (e.target === modal) close(); };  // 点遮罩关闭
+    modal.classList.add("show");
+  }
 
   // 方向键平移：仅在地图屏可见、无弹窗时生效
   window.addEventListener("keydown", (e) => {
